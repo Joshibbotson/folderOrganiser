@@ -1,6 +1,6 @@
 const fs = require("fs");
-const { get } = require("http");
 
+//put your target folder name in here i.e getPath('downloads') will return a path of "/Users/yourusername/downloads"
 function getPath(targetFolder) {
     const user = require("os").userInfo().username;
     return `/Users/${user}/${targetFolder}`;
