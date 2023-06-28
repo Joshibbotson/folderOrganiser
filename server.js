@@ -1,5 +1,4 @@
 const fs = require("fs");
-const { get } = require("http");
 
 //put your target folder name in here i.e getPath('downloads') will return a path of "/Users/yourusername/downloads"
 function getPath(targetFolder) {
@@ -120,35 +119,7 @@ fs.readdir(getPath("downloads"), (err, files) => {
     });
 });
 
-//movie folders - note this is a poor way to achieve this, the correct way would be
-//recurse through the folder until no directory left, check if any of the files
-// have .mkv or some video file type, then get the path from the first directory under
-//downloads
-// fs.readdir(getPath("downloads"), (err, files) => {
-//     console.log(files);
-//     files.forEach(file => {
-//         if (
-//             file.toLowerCase().includes("bluray") ||
-//             file.toLowerCase().includes("720p") ||
-//             file.toLowerCase().includes("1080p") ||
-//             file.toLowerCase().includes("x264") ||
-//             file.toLowerCase().includes("x265")
-//         ) {
-//             const oldPath = `${getPath("downloads")}/${file}`;
-//             const newPath = `${getPath("downloads")}/movies/${file}`;
-
-//             fs.rename(oldPath, newPath, err => {
-//                 if (err) {
-//                     console.log(err);
-//                 }
-//                 console.log("successful folder move");
-//             });
-//         }
-//     });
-// });
-
-checkForMovies();
-
+checkForMovies(null);
 function checkForMovies(currPath) {
     const path = currPath
         ? `${getPath("downloads")}/${currPath}`
@@ -194,3 +165,7 @@ function checkForMovies(currPath) {
         });
     });
 }
+
+fs.watch(`${getPath("downloads")}`, (eventType, filename) => {
+    checkForMovies(null);
+});
