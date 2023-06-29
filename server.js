@@ -5,122 +5,8 @@ function getPath(targetFolder) {
     const user = require("os").userInfo().username;
     return `/Users/${user}/${targetFolder}`;
 }
-//pictures
-fs.readdir(getPath("downloads"), (err, files) => {
-    files.forEach(file => {
-        if (
-            file.toLowerCase().includes(".jpeg") ||
-            file.toLowerCase().includes(".jpg") ||
-            file.toLowerCase().includes(".png") ||
-            file.toLowerCase().includes(".webp") ||
-            file.toLowerCase().includes(".svg") ||
-            file.toLowerCase().includes(".heic")
-        ) {
-            const oldPath = `${getPath("downloads")}/${file}`;
-            const newPath = `${getPath("downloads")}/pictures/${file}`;
 
-            fs.rename(oldPath, newPath, err => {
-                if (err) {
-                    console.log(err);
-                }
-                console.log("succesfully moved files");
-            });
-        }
-    });
-});
-
-//pdfs
-fs.readdir(getPath("downloads"), (err, files) => {
-    files.forEach(file => {
-        if (file.toLowerCase().includes(".pdf")) {
-            const oldPath = `${getPath("downloads")}/${file}`;
-            const newPath = `${getPath("downloads")}/pdf/${file}`;
-
-            fs.rename(oldPath, newPath, err => {
-                if (err) {
-                    console.log(err);
-                }
-                console.log("succesfully moved files");
-            });
-        }
-    });
-});
-//zips
-fs.readdir(getPath("downloads"), (err, files) => {
-    files.forEach(file => {
-        if (file.includes(".zip")) {
-            const oldPath = `${getPath("downloads")}/${file}`;
-            const newPath = `${getPath("downloads")}/zips/${file}`;
-
-            fs.rename(oldPath, newPath, err => {
-                if (err) {
-                    console.log(err);
-                }
-                console.log("succesfully moved files");
-            });
-        }
-    });
-});
-
-//sound files
-fs.readdir(getPath("downloads"), (err, files) => {
-    files.forEach(file => {
-        if (file.includes(".mp3")) {
-            const oldPath = `${getPath("downloads")}/${file}`;
-            const newPath = `${getPath("downloads")}/sounds/${file}`;
-
-            fs.rename(oldPath, newPath, err => {
-                if (err) {
-                    console.log(err);
-                }
-                console.log("succesfully moved files");
-            });
-        }
-    });
-});
-//movies files
-fs.readdir(getPath("downloads"), (err, files) => {
-    files.forEach(file => {
-        if (
-            file.toLowerCase().includes(".mkv") ||
-            file.toLowerCase().includes(".mp4") ||
-            file.toLowerCase().includes(".mov")
-        ) {
-            const oldPath = `${getPath("downloads")}/${file}`;
-            const newPath = `${getPath("downloads")}/movies/${file}`;
-
-            fs.rename(oldPath, newPath, err => {
-                if (err) {
-                    console.log(err);
-                }
-                console.log("succesfully moved files");
-            });
-        }
-    });
-});
-
-//dmg files
-fs.readdir(getPath("downloads"), (err, files) => {
-    files.forEach(file => {
-        if (
-            file.toLowerCase().includes(".dmg") ||
-            file.toLowerCase().includes(".pkg")
-        ) {
-            const oldPath = `${getPath("downloads")}/${file}`;
-            const newPath = `${getPath("downloads")}/dmg_files/${file}`;
-
-            fs.rename(oldPath, newPath, err => {
-                if (err) {
-                    console.log(err);
-                }
-                console.log("succesfully moved files");
-            });
-        }
-    });
-});
-
-checkForMovies(null);
-function checkForMovies(currPath) {
+function recFolderCheck(currPath, targetFileArr, targetFolder) {
     const path = currPath
         ? `${getPath("downloads")}/${currPath}`
         : `${getPath("downloads")}`;
@@ -131,17 +17,11 @@ function checkForMovies(currPath) {
         }
 
         files.forEach(file => {
-            if (
-                file.toLowerCase().includes(".bluray") ||
-                file.toLowerCase().includes(".720p") ||
-                file.toLowerCase().includes(".1080p") ||
-                file.toLowerCase().includes(".x264") ||
-                file.toLowerCase().includes(".x265") ||
-                file.toLowerCase().includes(".mkv") ||
-                file.toLowerCase().includes(".mp4")
-            ) {
+            if (targetFileArr.includes(file.toLowerCase())) {
                 const oldPath = `${path}/${file}`;
-                const newPath = `${getPath("downloads")}/movies/${file}`;
+                const newPath = `${getPath(
+                    "downloads"
+                )}/${targetFolder}/${file}`;
 
                 fs.rename(oldPath, newPath, err => {
                     if (err) {
@@ -158,14 +38,33 @@ function checkForMovies(currPath) {
 
         folders.forEach(folder => {
             if (currPath) {
-                checkForMovies(`${currPath}/${folder}`);
+                recFolderCheck(
+                    `${currPath}/${folder}`,
+                    targetFileArr,
+                    targetFolder
+                );
             } else if (!currPath) {
-                checkForMovies(`${folder}`);
+                recFolderCheck(`${folder}`, targetFileArr, targetFolder);
             }
         });
     });
 }
 
 fs.watch(`${getPath("downloads")}`, (eventType, filename) => {
-    checkForMovies(null);
+    //movies//
+    recFolderCheck(
+        null,
+        [".bluray", ".720p", "1080p", "x264", "x265", "mkv", ".mp4"],
+        "movies"
+    );
+    //pictures
+    recFolderCheck(
+        null,
+        [".jpeg", ".jpg", ".png", ".webp", ".svg", ".heic"],
+        "pictures"
+    );
+    recFolderCheck(null, [".pdf"], "movies");
+    recFolderCheck(null, [".zip"], "zips");
+    recFolderCheck(null, [".mp3"], "sounds");
+    recFolderCheck(null, [".pkg", ".dmg"], "dmg_files");
 });
